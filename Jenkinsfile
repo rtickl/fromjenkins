@@ -2,6 +2,7 @@ pipeline {
     agent {
         docker {
             image 'my-python313-aqa:latest'
+            reuseNode true  // 🔁 используем локальный агент, не требует pull
         }
     }
 
