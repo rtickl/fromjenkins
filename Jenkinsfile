@@ -1,29 +1,20 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'my-python313-aqa:latest'
+        }
+    }
 
     environment {
-        PYTHON = 'python3'  // Для Linux/Mac
+        PYTHON = 'python3'
         VENV_DIR = 'venv'
     }
 
     stages {
-        stage('Environment Check') {
+        stage('Prepare Environment') {
             steps {
                 sh '''
-                    echo "### System Info ###"
-                    uname -a
-                    echo "\\n### Python Version ###"
-                    ${PYTHON} --version || echo "Python not found"
-                    echo "\\n### Workspace Contents ###"
-                    ls -la
-                '''
-            }
-        }
-
-        stage('Create Virtual Env') {
-            steps {
-                sh '''
-                    echo "Creating virtual environment..."
+                    echo "🔧 Creating virtual environment..."
                     ${PYTHON} -m venv ${VENV_DIR}
                     . ${VENV_DIR}/bin/activate
                     pip install --upgrade pip
@@ -34,7 +25,7 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh '''
-                    echo "Installing dependencies..."
+                    echo "📦 Installing dependencies..."
                     . ${VENV_DIR}/bin/activate
                     pip install -r requirements.txt
                 '''
@@ -44,7 +35,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sh '''
-                    echo "Running tests..."
+                    echo "🚀 Running tests..."
                     . ${VENV_DIR}/bin/activate
                     pytest tests/ \
                         --alluredir=allure-results \
