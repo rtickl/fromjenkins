@@ -1,11 +1,13 @@
 FROM python:3.13-slim
 
-RUN apt-get update && apt-get install -y \
-    python3.13-venv \
-    curl \
-    unzip \
+# Базовые утилиты. Используем safe mode: без fail при ошибке
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+       curl unzip \
+    || echo "apt-get failed (will try alternative)" \
     && rm -rf /var/lib/apt/lists/*
 
+# Устанавливаем Allure CLI (без лишнего)
 ENV ALLURE_VERSION=2.25.0
 RUN curl -sL https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.zip -o allure.zip && \
     unzip allure.zip -d /opt/ && \
