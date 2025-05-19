@@ -1,47 +1,23 @@
 pipeline {
-    agent {
-        docker {
-            image 'my-python313-aqa:latest'
-            reuseNode true
-            args '--pull never'
-        }
-    }
-
-    environment {
-        PYTHON = 'python3'
-        VENV_DIR = 'venv'
-    }
+    agent any
 
     stages {
-        stage('Prepare Environment') {
+        stage('Run tests in Docker') {
             steps {
                 sh '''
-                    echo "🔧 Creating virtual environment..."
-                    ${PYTHON} -m venv ${VENV_DIR}
-                    . ${VENV_DIR}/bin/activate
-                    pip install --upgrade pip
-                '''
-            }
-        }
+                    echo "🐳 Запускаем тесты внутри Docker-контейнера"
 
-        stage('Install Dependencies') {
-            steps {
-                sh '''
-                    echo "📦 Installing dependencies..."
-                    . ${VENV_DIR}/bin/activate
-                    pip install -r requirements.txt
-                '''
-            }
-        }
-
-        stage('Run Tests') {
-            steps {
-                sh '''
-                    echo "🚀 Running tests..."
-                    . ${VENV_DIR}/bin/activate
-                    pytest tests/ \
-                        --alluredir=allure-results \
-                        --junitxml=junit-results.xml
+                    docker run --rm \
+                        -v "$PWD":/app \
+                        -w /app \
+                        my-python313-aqa:latest \
+                        bash -c "
+                            python3 -m venv venv && \
+                            . venv/bin/activate && \
+                            pip install --upgrade pip && \
+                            pip install -r requirements.txt && \
+                            pytest tests/ --alluredir=allure-results --junitxml=junit-results.xml
+                        "
                 '''
             }
         }
