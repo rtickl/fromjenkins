@@ -2,7 +2,6 @@ pipeline {
     agent {
         docker {
             image 'my-python313-aqa:latest'
-            label 'docker'
             reuseNode true
             args '--pull never'
         }
